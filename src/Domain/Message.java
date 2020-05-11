@@ -1,9 +1,7 @@
-package domain;
+package Domain;
 
-import javax.xml.crypto.Data;
 import java.io.File;
 import java.io.Serializable;
-import java.time.LocalDate;
 import java.util.Date;
 
 /**
@@ -22,22 +20,6 @@ public class Message implements Serializable {
         return msg;
     }
 
-    public void setMsg(Object msg) {
-        this.msg = msg;
-    }
-
-    public String getTime() {
-        return time;
-    }
-
-    public void setTime(String time) {
-        this.time = time;
-    }
-
-    public void setSender(String sender) {
-        this.sender = sender;
-    }
-
     public Message() {
     }
 
@@ -49,14 +31,10 @@ public class Message implements Serializable {
         this.msg = file;
         this.sender = sender;
     }
-    public String getSender() {
-        return sender;
-    }
-
     @Override
     public String toString() {
         if (msg instanceof String) return time + " " + sender + " \n" + msg;
-        else return time + " " + sender + " \n" + ((File) msg).getName();
+        else return time + " " + sender + " \n" + ((File) msg).getName() + " 已发送";
     }
 
     public String getLoginMessage(String name){

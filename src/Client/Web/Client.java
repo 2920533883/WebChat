@@ -1,6 +1,8 @@
 package Client.Web;
 
 
+import Domain.Warning;
+
 import java.net.Socket;
 
 

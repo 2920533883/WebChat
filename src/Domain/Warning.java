@@ -1,4 +1,4 @@
-package Client.Web;
+package Domain;
 
 import javax.swing.*;
 

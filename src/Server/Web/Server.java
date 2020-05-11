@@ -3,21 +3,17 @@ package Server.Web;
 
 import Client.UI.ChatWindow;
 import DataBase.Dao;
-import domain.Message;
-import domain.User;
-
+import Domain.Message;
+import Domain.User;
+import Domain.Warning;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileSystemView;
 import java.awt.*;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -37,13 +33,13 @@ public class Server extends JFrame{
     private JTextArea textArea = null; // 显示登陆，推出消息
     private final JLabel onlineShowLabel; // 显示在线人数
     public Server(){
+
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(100, 100, 600, 400);
         JPanel mainPanel = new JPanel();
         mainPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
         mainPanel.setLayout(new BorderLayout(0, 0));
         setContentPane(mainPanel);
-
         // 顶部
         JPanel panel = new JPanel();
         mainPanel.add(panel, BorderLayout.NORTH);
@@ -51,20 +47,22 @@ public class Server extends JFrame{
 
         // 服务器名称
         JLabel nameLabel = new JLabel();
-        nameLabel.setFont(new Font("黑体", Font.BOLD, 20));
+        nameLabel.setFont(new Font("华文行楷", Font.BOLD, 20));
         nameLabel.setText("服务器");
         panel.add(nameLabel, BorderLayout.WEST);
 
         // 服务器状态
         JLabel statusLabel = new JLabel();
-        statusLabel.setIcon(new ImageIcon(Server.class.getResource("started.gif")));
+        statusLabel.setIcon(new ImageIcon(Server.class.getResource("../Image/started.gif")));
         panel.add(statusLabel, BorderLayout.EAST);
 
         // 右部
         JPanel rightPanel = new JPanel();
-        rightPanel.setLayout(new GridLayout(3,1,5,5));
+        rightPanel.setLayout(new GridLayout(3,1,30,30));
         JButton downLoadButton1 = new JButton("保存签到信息");
+        downLoadButton1.setFocusPainted(false);
         JButton downLoadButton2 = new JButton("保存聊天信息");
+        downLoadButton2.setFocusPainted(false);
         downLoadButton1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -94,13 +92,14 @@ public class Server extends JFrame{
         rightPanel.add(downLoadButton1);
         rightPanel.add(downLoadButton2);
         onlineShowLabel = new JLabel();
+        onlineShowLabel.setFont(new Font("华文行楷", Font.PLAIN, 17));
         onlineShowLabel.setText("在线人数：" + onlineNum);
         rightPanel.add(onlineShowLabel);
         mainPanel.add(rightPanel, BorderLayout.EAST);
 
         // 登录，退出信息显示
         textArea = new JTextArea();
-        textArea.setFont(new Font("黑体", Font.PLAIN, 14));
+        textArea.setFont(new Font("宋体", Font.PLAIN, 14));
         textArea.setLineWrap(true);
         textArea.setEnabled(false);
         JScrollPane scrollPane = new JScrollPane();
@@ -131,9 +130,10 @@ public class Server extends JFrame{
             new Thread(new LoginThread()).start();
             new Thread(new LogoutThread()).start();
             new Thread(new TransmitThread()).start();
-
         } catch (IOException e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
+            Warning.SERVERCONTSTART();
+            System.exit(0);
         }
     }
 
@@ -143,7 +143,7 @@ public class Server extends JFrame{
         byte[] buff = new byte[MAX_LEN];
         DatagramPacket packet = new DatagramPacket(buff, MAX_LEN);
         @Override
-        public void run() {
+        synchronized public void run() {
             while (true){
                 try {
                     datagramSocket.receive(packet);
@@ -152,13 +152,7 @@ public class Server extends JFrame{
                     Object msg = oips.readObject();
                     Message message = (Message) msg;
                     Object msgType = ((Message) msg).getMsg();
-                    if (msgType instanceof String) {
-                         //反序列化
-                        for (ChatWindow chatWindow : onlineList) {
-                            chatWindow.appendMyText(message.toString());
-                        }
-                    }
-                    else if (msgType instanceof File){
+                    if (msgType instanceof File){
                         File file = (File) message.getMsg();
                         FileInputStream fips = new FileInputStream(file);
                         FileSystemView fsv = FileSystemView.getFileSystemView(); // 获取桌面路径
@@ -166,12 +160,13 @@ public class Server extends JFrame{
                         FileOutputStream fops = new FileOutputStream(filePath);
                         byte[] buffer = new byte[50];
                         int len = 0;
-                        while ((len = fips.read(buffer)) != -1){
+                        while ((len = fips.read(buffer)) != -1) {
                             fops.write(buffer, 0, len);
                         }
-                        for (ChatWindow chatWindow : onlineList) {
+                    }
+                    for (ChatWindow chatWindow : onlineList) {
+                        if (!chatWindow.getSocket().getLocalAddress().equals(packet.getAddress()))
                             chatWindow.appendMyText(message.toString());
-                        }
                     }
                 } catch (IOException | ClassNotFoundException e) {
                     e.printStackTrace();
@@ -188,7 +183,6 @@ public class Server extends JFrame{
                 try {
                     Socket socket = serverSocket.accept();
                     String userIp = socket.getLocalAddress().toString().substring(1);
-                    System.out.println(userIp);
                     User user = dao.queryOnline(userIp);
                     ChatWindow chatWindow = new ChatWindow(socket, user);
                     onlineList.add(chatWindow);

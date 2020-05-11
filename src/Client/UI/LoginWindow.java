@@ -1,17 +1,14 @@
 package Client.UI;
-import Client.Web.Warning;
+import Domain.Warning;
 import DataBase.Dao;
-import DataBase.JDBCUtil;
 import Client.Web.Client;
-import domain.User;
-
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.*;
 import java.util.Scanner;
-
 import javax.swing.*;
+import javax.swing.border.MatteBorder;
 
 /**
  * @program: WebChat
@@ -20,7 +17,7 @@ import javax.swing.*;
  * @create: 2020-04-17 15:49
  **/
 
-public class LoginWindow{
+public class LoginWindow extends JFrame{
     Dao dao = new Dao();
     String ip = null;
     public void initUI() {
@@ -28,49 +25,72 @@ public class LoginWindow{
         ip = s.next();
         // 在initUI方法中，实例化JFrame类的对象。
         JFrame frame = new JFrame();
-        frame.setTitle("Login"); // 设置窗体的标题
-        frame.setSize(400, 300); // 设置窗体的大小，单位是像素
+        frame.setTitle("登录"); // 设置窗体的标题
+        frame.setSize(450, 300); // 设置窗体的大小，单位是像素
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE); // 设置窗体的关闭操作；
         frame.setLocationRelativeTo(null); // 设置窗体相对于另一个组件的居中位置，参数null表示窗体相对于屏幕的中央位置
         frame.setResizable(false); // 设置禁止调整窗体大小
 
-        // 实例化流式布局类的对象
-        frame.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 20));
-
+        JPanel mainPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
+        frame.add(mainPanel);
         //设置标签大小
-        Dimension dim1 = new Dimension(300,30);
-        Dimension dim2 = new Dimension(90,30);
+        Dimension dim1 = new Dimension(200,25);
+        Dimension dim2 = new Dimension(100,35);
+        Dimension dim3 = new Dimension(300, 30);
+        // TextFild样式
+        MatteBorder border = new MatteBorder(0, 0, 1, 0, Color.BLACK);
         // 姓名
+        JPanel namePanel = new JPanel();
+        namePanel.setSize(dim3);
         JLabel nameLable = new JLabel("姓名：");
-        frame.add(nameLable);
+        nameLable.setFont(new Font("黑体", Font.PLAIN, 13));
+        namePanel.add(nameLable);
         JTextField nameText = new JTextField();
+        nameText.setOpaque(false);
+        nameText.setBorder(border);
         nameText.setPreferredSize(dim1);
-        frame.add(nameText);
+        namePanel.add(nameText);
+        mainPanel.add(namePanel);
         // 专业班级
+        JPanel classPanel = new JPanel();
+        classPanel.setSize(dim3);
         JLabel classLable = new JLabel("班级：");
-        frame.add(classLable);
+        classLable.setFont(new Font("黑体", Font.PLAIN, 13));
+        classPanel.add(classLable);
         JTextField classText = new JTextField();
+        classText.setOpaque(false);
+        classText.setBorder(border);
         classText.setPreferredSize(dim1);
-        frame.add(classText);
-
+        classPanel.add(classText);
+        mainPanel.add(classPanel);
         // 密码
+        JPanel passwordPanel = new JPanel();
+        passwordPanel.setSize(dim3);
         JLabel passwordLable= new JLabel("密码：");
-        frame.add(passwordLable);
-        JPasswordField passwordField=new JPasswordField();
+        passwordLable.setFont(new Font("黑体", Font.PLAIN, 13));
+        passwordPanel.add(passwordLable);
+        JPasswordField passwordField = new JPasswordField();
+        passwordField.setOpaque(false);
+        passwordField.setBorder(border);
         passwordField.setPreferredSize(dim1);
-        frame.add(passwordField);
+        passwordPanel.add(passwordField);
+        mainPanel.add(passwordPanel);
 
         //实例化JButton组件
-        JButton loginButton = new JButton();
-        JButton registerButton = new JButton();
-        //设置按钮的显示内容
-        loginButton.setText("登录");
-        registerButton.setText("注册");
+        JPanel buttonPanel = new JPanel(new GridLayout(1,2,35,5));
+        buttonPanel.setSize(dim3);
+        MyButton loginButton = new MyButton("登录");
+        MyButton registerButton = new MyButton("注册");
         //设置按钮的大小
+        loginButton.setFont(new Font("华文行楷", Font.PLAIN, 16));
+        registerButton.setFont(new Font("华文行楷", Font.PLAIN, 16));
         loginButton.setPreferredSize(dim2);
         registerButton.setPreferredSize(dim2);
-        frame.add(loginButton);
-        frame.add(registerButton);
+        loginButton.setFocusPainted(false);
+        registerButton.setFocusPainted(false);
+        buttonPanel.add(loginButton);
+        buttonPanel.add(registerButton);
+        mainPanel.add(buttonPanel);
         frame.setVisible(true);// 设置窗体为可见
         // 登录监视
         loginButton.addActionListener(new ActionListener() {

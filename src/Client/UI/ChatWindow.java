@@ -1,8 +1,8 @@
 package Client.UI;
 
 import DataBase.Dao;
-import domain.Message;
-import domain.User;
+import Domain.Message;
+import Domain.User;
 
 
 import java.awt.*;
@@ -39,7 +39,7 @@ public class ChatWindow extends JFrame {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        setTitle("聊天窗口");
+        setTitle(user.getName()+"的聊天窗口");
         setEnabled(true);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setBounds(100, 100, 650, 600);
@@ -93,11 +93,13 @@ public class ChatWindow extends JFrame {
         sendPanel.setLayout(new FlowLayout(FlowLayout.RIGHT, 5, 5));
 
         // 发送信息按钮
-        JButton btnSend = new JButton("发送");
-        btnSend.setMnemonic(KeyEvent.VK_ENTER); // 设置快捷键 ALT+ENTER
-        sendPanel.add(btnSend);
+        MyButton sendMsgButton = new MyButton("发送");
+        sendMsgButton.setFocusPainted(false);
+        sendMsgButton.setMnemonic(KeyEvent.VK_ENTER); // 设置快捷键 ALT+ENTER
+        sendMsgButton.setPreferredSize(new Dimension(100, 40));
+        sendPanel.add(sendMsgButton);
         // 发送按钮事件监听
-        btnSend.addActionListener(new ActionListener() {
+        sendMsgButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if (!editor.getText().equals("")) {
                     try {
@@ -110,7 +112,9 @@ public class ChatWindow extends JFrame {
             }
         });
         // 发送文件按钮
-        JButton sendFileButton = new JButton("发送文件");
+        MyButton sendFileButton = new MyButton("发送文件");
+        sendFileButton.setFocusPainted(false);
+        sendFileButton.setPreferredSize(new Dimension(100, 40));
         sendPanel.add(sendFileButton);
         sendFileButton.addActionListener(new ActionListener() {
             @Override
@@ -132,7 +136,7 @@ public class ChatWindow extends JFrame {
                 while (true) {
                     onlineList = dao.getOnline();
                     onlineJList = new JList<Object>(onlineList.toArray());
-                    onlineJList.setFont(new Font("Microsoft YaHei", Font.PLAIN, 12));
+                    onlineJList.setFont(new Font("Microsoft YaHei", Font.PLAIN, 14));
                     onlineJList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
                     onlineListScrollPanel.setViewportView(onlineJList);
                     try {
@@ -215,7 +219,7 @@ public class ChatWindow extends JFrame {
             Message msg = null;
             // 继承看是String类还是File类
             if (content instanceof String) {
-                msg = new Message((String)content, user.getName());
+                msg = new Message((String) content, user.getName());
             }
             else if (content instanceof File){
                 msg = new Message((File) content, user.getName());
@@ -225,8 +229,8 @@ public class ChatWindow extends JFrame {
             oops.writeObject(msg); // 序列化
             oops.flush();
             byte[] buff = baos.toByteArray();   //转化为字节数组
-            DatagramPacket datagram = new DatagramPacket(buff, buff.length, InetAddress.getByName(user.getUserPort()), 8881); // 打包
-            datagramSocket.send(datagram);
+            DatagramPacket packet = new DatagramPacket(buff, buff.length, InetAddress.getByName(user.getUserPort()), 8881); // 打包
+            datagramSocket.send(packet);
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -249,12 +253,10 @@ public class ChatWindow extends JFrame {
         printor.setText(printor.getText() + text + '\n');
     }
 
-
     public Socket getSocket(){
         return userSocket;
     }
     public String getUserport(){
         return user.getUserPort();
     }
-
 }

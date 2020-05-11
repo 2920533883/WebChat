@@ -1,7 +1,7 @@
 package DataBase;
 
-import Client.Web.Warning;
-import domain.User;
+import Domain.Warning;
+import Domain.User;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -41,6 +41,7 @@ public class Dao {
                 return true;
             }
         } catch (Exception e){
+            e.printStackTrace();
             return false;
         }
         return false;
@@ -64,7 +65,7 @@ public class Dao {
             ResultSet resultSet = stmt.executeQuery("select * from online");
             while (resultSet.next()){
                 User user = new User(resultSet.getString("name"), resultSet.getString("class"), resultSet.getString("ip"));
-                onlineList.add(user.toString());
+                onlineList.add(user.get_class()+" "+user.getName());
             }
         } catch (SQLException throwables) {
             throwables.printStackTrace();
@@ -82,10 +83,9 @@ public class Dao {
             ResultSet resultSet = pstmt.executeQuery();
             resultSet.next();
             user = new User(resultSet.getString("name"), resultSet.getString("class"), userIp);
-            System.out.println(user.toString());
             return user;
         } catch (SQLException throwables) {
-            throwables.printStackTrace();
+            System.out.println(throwables.getMessage());
             return null;
         }
     }
