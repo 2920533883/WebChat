@@ -1,5 +1,7 @@
 package Domain;
 
+import java.io.Serializable;
+
 /**
  * @program: WebChat
  * @description: 用户类
@@ -7,7 +9,7 @@ package Domain;
  * @create: 2020-04-23 17:21
  **/
 
-public class User {
+public class User implements Serializable {
     private final String name; // 姓名
     private final String _class; // 班级
     private final String userPort; // Port

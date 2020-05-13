@@ -13,8 +13,8 @@ import java.util.Date;
 
 public class Message implements Serializable {
     private Object msg; // 消息内容
-    private String time = new Date().toLocaleString();; // 消息时间
-    private String sender; // 发送者
+    private String time = new Date().toLocaleString(); // 消息时间
+    private User sender; // 发送者IP
 
     public Object getMsg() {
         return msg;
@@ -23,18 +23,29 @@ public class Message implements Serializable {
     public Message() {
     }
 
-    public Message(String msg, String sender) {
+    public Message(String msg, User user) {
         this.msg = msg;
-        this.sender = sender;
+        sender = user;
     }
-    public Message(File file, String sender){
+    public Message(File file, User user){
         this.msg = file;
-        this.sender = sender;
+        sender = user;
     }
-    @Override
-    public String toString() {
-        if (msg instanceof String) return time + " " + sender + " \n" + msg;
-        else return time + " " + sender + " \n" + ((File) msg).getName() + " 已发送";
+
+    public String sendGroupMsg() {
+        if (msg instanceof String) return time + " " + sender.getName() + " \n" + msg;
+        else return time + " " + sender.getName() + " \n" + ((File) msg).getName() + " 已发送";
+    }
+    public String sendPrivateMsg(){
+        return time + sender.getName() + "悄悄对你说:\n" + msg;
+    }
+
+    public User getSender() {
+        return sender;
+    }
+
+    public void setMsg(Object msg) {
+        this.msg = msg;
     }
 
     public String getLoginMessage(String name){

@@ -26,8 +26,8 @@ public class ChatWindow extends JFrame {
     private Socket userSocket;
     private User user;
     private JPanel mainPanel; // 主面板
-    private JTextPane printor;   // 聊天面板
-    private JTextPane editor = null;    // 编辑信息面板
+    private JTextArea printor;   // 聊天面板
+    private JTextArea editor = null;    // 编辑信息面板
     private JSplitPane splitPane;    // 动态分割线
     private static final int SERVERPORT = 8880;
 
@@ -77,8 +77,10 @@ public class ChatWindow extends JFrame {
         topPanel.add(printorScrollPanel, BorderLayout.CENTER);
 
         // 聊天信息显示区域
-        printor = new JTextPane();
+        printor = new JTextArea();
         printor.setFont(new Font("Microsoft YaHei", Font.PLAIN, 20));
+        printor.setWrapStyleWord(true);
+        printor.setLineWrap(true);
         printor.setEditable(false);
         printorScrollPanel.setViewportView(printor);
 
@@ -156,7 +158,9 @@ public class ChatWindow extends JFrame {
         });
 
         // 信息编辑区
-        editor = new JTextPane();
+        editor = new JTextArea();
+        editor.setWrapStyleWord(true);
+        editor.setLineWrap(true);
         // 信息编辑区的下拉
         JScrollPane editorScrollPane = new JScrollPane();
         editorScrollPane.setBorder(new EmptyBorder(0, 0, 0, 0));
@@ -219,17 +223,17 @@ public class ChatWindow extends JFrame {
             Message msg = null;
             // 继承看是String类还是File类
             if (content instanceof String) {
-                msg = new Message((String) content, user.getName());
+                msg = new Message((String) content, user);
             }
             else if (content instanceof File){
-                msg = new Message((File) content, user.getName());
+                msg = new Message((File) content, user);
             }
             // 发送
             oops = new ObjectOutputStream(baos);
             oops.writeObject(msg); // 序列化
             oops.flush();
             byte[] buff = baos.toByteArray();   //转化为字节数组
-            DatagramPacket packet = new DatagramPacket(buff, buff.length, InetAddress.getByName(user.getUserPort()), 8881); // 打包
+            DatagramPacket packet = new DatagramPacket(buff, buff.length, InetAddress.getLocalHost(), 8881); // 打包
             datagramSocket.send(packet);
         } catch (IOException e) {
             e.printStackTrace();
@@ -258,5 +262,9 @@ public class ChatWindow extends JFrame {
     }
     public String getUserport(){
         return user.getUserPort();
+    }
+
+    public static void main(String[] args) {
+        new ChatWindow(new Socket(), new User("0", "0", "0"));
     }
 }

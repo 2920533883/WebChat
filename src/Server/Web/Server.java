@@ -151,8 +151,30 @@ public class Server extends JFrame{
                     ObjectInputStream oips = new ObjectInputStream(bais);
                     Object msg = oips.readObject();
                     Message message = (Message) msg;
-                    Object msgType = ((Message) msg).getMsg();
-                    if (msgType instanceof File){
+                    Object msgContent = ((Message) msg).getMsg();
+                    User sender = message.getSender();
+                    if (msgContent instanceof String) {
+                        if (((String) msgContent).charAt(0) == '@') {
+                            // 获取接收者姓名
+                            String accpter = ((String) msgContent).substring(1, ((String) msgContent).indexOf(":"));
+                            // 裁剪信息
+                            message.setMsg(((String) msgContent).substring(((String) msgContent).indexOf(":")+1));
+                            // 获取接收者
+                            InetAddress accpterIP = InetAddress.getByName(dao.queryIP(accpter));
+                            // 获取发送者名字
+
+                            for (ChatWindow chatWindow : onlineList) {
+                                if (chatWindow.getSocket().getLocalAddress().equals(accpterIP))
+                                    chatWindow.appendMyText(message.sendPrivateMsg());
+                            }
+                        }
+                        else {
+                            for (ChatWindow chatWindow : onlineList) {
+                                chatWindow.appendMyText(message.sendGroupMsg());
+                            }
+                        }
+                    }
+                    if (msgContent instanceof File){
                         File file = (File) message.getMsg();
                         FileInputStream fips = new FileInputStream(file);
                         FileSystemView fsv = FileSystemView.getFileSystemView(); // 获取桌面路径
@@ -163,11 +185,11 @@ public class Server extends JFrame{
                         while ((len = fips.read(buffer)) != -1) {
                             fops.write(buffer, 0, len);
                         }
+                        for (ChatWindow chatWindow : onlineList) {
+                                chatWindow.appendMyText(message.sendGroupMsg());
+                        }
                     }
-                    for (ChatWindow chatWindow : onlineList) {
-                        if (!chatWindow.getSocket().getLocalAddress().equals(packet.getAddress()))
-                            chatWindow.appendMyText(message.toString());
-                    }
+
                 } catch (IOException | ClassNotFoundException e) {
                     e.printStackTrace();
                 }

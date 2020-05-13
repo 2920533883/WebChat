@@ -89,6 +89,20 @@ public class Dao {
             return null;
         }
     }
+    // 查询某位学生的IP
+    public String queryIP(String userName){
+        User user = null;
+        try {
+            pstmt = con.prepareStatement("select ip from online where name = ?");
+            pstmt.setString(1, userName);
+            ResultSet resultSet = pstmt.executeQuery();
+            resultSet.next();
+            return resultSet.getString("ip");
+        } catch (SQLException throwables) {
+            System.out.println(throwables.getMessage());
+            return null;
+        }
+    }
 
     // 删除退出学生
     public void deletLogout(String userIp){
