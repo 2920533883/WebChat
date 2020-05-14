@@ -161,11 +161,14 @@ public class Server extends JFrame{
                             message.setMsg(((String) msgContent).substring(((String) msgContent).indexOf(":")+1));
                             // 获取接收者
                             InetAddress accpterIP = InetAddress.getByName(dao.queryIP(accpter));
-                            // 获取发送者名字
 
                             for (ChatWindow chatWindow : onlineList) {
-                                if (chatWindow.getSocket().getLocalAddress().equals(accpterIP))
+                                if (chatWindow.getSocket().getLocalAddress().equals(accpterIP)) {
                                     chatWindow.appendMyText(message.sendPrivateMsg());
+                                }
+                                if (chatWindow.getSocket().getLocalAddress().equals(InetAddress.getByName(sender.getUserPort()))){
+                                    chatWindow.appendMyText(message.myMsg(accpter));
+                                }
                             }
                         }
                         else {

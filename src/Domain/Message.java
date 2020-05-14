@@ -37,9 +37,11 @@ public class Message implements Serializable {
         else return time + " " + sender.getName() + " \n" + ((File) msg).getName() + " 已发送";
     }
     public String sendPrivateMsg(){
-        return time + sender.getName() + "悄悄对你说:\n" + msg;
+        return time + sender.getName() + "对你说: \n" + msg;
     }
-
+    public String myMsg(String name){
+        return time+" 你对"+ name + "说: \n" + msg;
+    }
     public User getSender() {
         return sender;
     }
