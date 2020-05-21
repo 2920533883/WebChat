@@ -133,7 +133,6 @@ public class LoginWindow extends JFrame{
             }
         });
     }
-
     public static void main(String[] args) {
         new LoginWindow().initUI();
     }

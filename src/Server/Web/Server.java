@@ -63,30 +63,27 @@ public class Server extends JFrame{
         downLoadButton1.setFocusPainted(false);
         JButton downLoadButton2 = new JButton("保存聊天信息");
         downLoadButton2.setFocusPainted(false);
-        downLoadButton1.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                FileOutputStream fops = null;
-                try {
-                    fops = new FileOutputStream("签到信息.txt");
-                    fops.write(textArea.getText().getBytes());
-                } catch (IOException ioException) {
-                    ioException.printStackTrace();
-                }
+        downLoadButton1.addActionListener(e -> {
+            FileOutputStream fops = null;
+            try {
+                fops = new FileOutputStream("C:/Users/22972/Desktop/签到信息.txt");
+                fops.write(textArea.getText().getBytes());
+                Warning.SAVESUCCESS();
+            } catch (IOException ioException) {
+                Warning.SAVEFAIL();
+                ioException.printStackTrace();
             }
         });
-        downLoadButton2.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                FileOutputStream fops = null;
-                try {
-                    fops = new FileOutputStream("聊天信息.txt");
-                    String chatMsg = dao.getChatMsg();
-                    System.out.println(chatMsg);
-                    fops.write(chatMsg.getBytes());
-                } catch (IOException ioException) {
-                    ioException.printStackTrace();
-                }
+        downLoadButton2.addActionListener(e -> {
+            FileOutputStream fops = null;
+            try {
+                fops = new FileOutputStream("C:/Users/22972/Desktop/聊天信息.txt");
+                String chatMsg = dao.getChatMsg();
+                fops.write(chatMsg.getBytes());
+                Warning.SAVESUCCESS();
+            } catch (IOException ioException) {
+                Warning.SAVEFAIL();
+                ioException.printStackTrace();
             }
         });
         rightPanel.add(downLoadButton1);
@@ -113,17 +110,14 @@ public class Server extends JFrame{
             serverSocket = new ServerSocket(SOCKETPORT);
             datagramSocket = new DatagramSocket(DATAGRAMPORT);
             // 监听程序退出，用于清空在线学生表和关闭资源
-            Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    dao.clearOnlineTable();
-                    dao.clearChatMsgTable();
-                    dao.close();
-                    try {
-                        serverSocket.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                dao.clearOnlineTable();
+                dao.clearChatMsgTable();
+                dao.close();
+                try {
+                    serverSocket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }));
             // 线程
@@ -149,29 +143,37 @@ public class Server extends JFrame{
                     datagramSocket.receive(packet);
                     ByteArrayInputStream bais = new ByteArrayInputStream(buff);
                     ObjectInputStream oips = new ObjectInputStream(bais);
-                    Object msg = oips.readObject();
+                    Object msg = oips.readObject(); // 反序列化
                     Message message = (Message) msg;
                     Object msgContent = ((Message) msg).getMsg();
                     User sender = message.getSender();
                     if (msgContent instanceof String) {
-                        if (((String) msgContent).charAt(0) == '@') {
-                            // 获取接收者姓名
-                            String accpter = ((String) msgContent).substring(1, ((String) msgContent).indexOf(":"));
-                            // 裁剪信息
-                            message.setMsg(((String) msgContent).substring(((String) msgContent).indexOf(":")+1));
-                            // 获取接收者
-                            InetAddress accpterIP = InetAddress.getByName(dao.queryIP(accpter));
-
-                            for (ChatWindow chatWindow : onlineList) {
-                                if (chatWindow.getSocket().getLocalAddress().equals(accpterIP)) {
-                                    chatWindow.appendMyText(message.sendPrivateMsg());
-                                }
-                                if (chatWindow.getSocket().getLocalAddress().equals(InetAddress.getByName(sender.getUserPort()))){
-                                    chatWindow.appendMyText(message.myMsg(accpter));
+                        String content = (String) msgContent;
+                        if (content.charAt(0) == '@') {
+                            if (content.contains(":")){
+                                // 获取接收者姓名
+                                String accpter = (content.substring(1, content.indexOf(":")));
+                                // 裁剪信息
+                                message.setMsg((content.substring(content.indexOf(":")+1)));
+                                // 获取接收者IP
+                                String accpterIP = dao.queryIP(accpter);
+                                if (accpterIP == null) Warning.FINDFAIL();
+                                else {
+                                    InetAddress IP = InetAddress.getByName(accpterIP);
+                                    for (ChatWindow chatWindow : onlineList) {
+                                        if (chatWindow.getSocket().getLocalAddress().equals(IP)) {
+                                            chatWindow.appendMyText(message.sendPrivateMsg());
+                                        }
+                                        if (chatWindow.getSocket().getLocalAddress().equals(InetAddress.getByName(sender.getUserPort()))) {
+                                            chatWindow.appendMyText(message.myMsg(accpter));
+                                        }
+                                    }
                                 }
                             }
+                            else Warning.FORMATERORR();
                         }
                         else {
+                            dao.insertChatMsg(message.sendGroupMsg());
                             for (ChatWindow chatWindow : onlineList) {
                                 chatWindow.appendMyText(message.sendGroupMsg());
                             }

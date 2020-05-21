@@ -9,6 +9,7 @@
       <w>serverport</w>
       <w>socketport</w>
       <w>userport</w>
+      <w>webchat</w>
     </words>
   </dictionary>
 </component>

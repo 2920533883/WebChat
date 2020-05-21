@@ -41,4 +41,16 @@ public class Warning {
         String msg = "账号：" + username + "\n" + "密码：" + password;
         return JOptionPane.showConfirmDialog(null, msg, "注册",JOptionPane.YES_NO_OPTION); //返回值为0或1
     }
+    public static void SAVESUCCESS(){
+        JOptionPane.showMessageDialog(null, "保存成功！");
+    }
+    public static void SAVEFAIL(){
+        JOptionPane.showMessageDialog(null, "保存失败！");
+    }
+    public static void FORMATERORR(){
+        JOptionPane.showMessageDialog(null, "格式不符！", "警告",JOptionPane.WARNING_MESSAGE);
+    }
+    public static void FINDFAIL(){
+        JOptionPane.showMessageDialog(null, "未找到该用户！", "警告",JOptionPane.WARNING_MESSAGE);
+    }
 }
